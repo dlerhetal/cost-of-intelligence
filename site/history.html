@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History — Cost of Intelligence</title>
+<meta name="description" content="Three years of AI inference pricing history. The frontier floor fell 80× from March 2023 to May 2026 — see exactly when and why.">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="coi">
+  <h1>Cost of Intelligence</h1>
+  <p class="tagline">Three years of frontier-tier pricing, walked.</p>
+  <nav class="nav">
+    <a href="index.html">Now</a>
+    <a class="here">History</a>
+    <a href="forecast.html">Forecast</a>
+    <a href="https://github.com/dlerhetal/cost-of-intelligence">GitHub</a>
+  </nav>
+</header>
+
+<p style="font-size: 1.05rem; color: var(--muted); max-width: 800px;">
+The cheapest frontier-tier AI model has fallen <strong>~80×</strong> in three years — from GPT-4 at roughly <strong>$0.10 / task</strong> in March 2023 to DeepSeek V4 Pro at about <strong>$0.001 / task</strong> in May 2026. The curve below is on a log scale; what looks gentle is anything but. Use the controls to flip between tiers, units, and price-leader views.
+</p>
+
+<div class="controls" id="history-controls">
+  <div class="group">
+    <label>Tier</label>
+    <div class="row" id="tier-row">
+      <button class="toggle-btn active" data-tier="frontier">Frontier</button>
+      <button class="toggle-btn" data-tier="mid">Mid</button>
+      <button class="toggle-btn" data-tier="budget">Budget</button>
+    </div>
+  </div>
+  <div class="group">
+    <label>Unit</label>
+    <div class="row" id="unit-row">
+      <button class="toggle-btn active" data-unit="task">$ / task</button>
+      <button class="toggle-btn" data-unit="output_mtok">$ / MTok output</button>
+      <button class="toggle-btn" data-unit="input_mtok">$ / MTok input</button>
+    </div>
+  </div>
+  <div class="group">
+    <label>View</label>
+    <div class="row" id="view-row">
+      <button class="toggle-btn active" data-view="floor">Price leader (floor)</button>
+      <button class="toggle-btn" data-view="all">All providers</button>
+    </div>
+  </div>
+  <div class="group">
+    <label>Scale</label>
+    <div class="row" id="scale-row">
+      <button class="toggle-btn active" data-scale="log">Log</button>
+      <button class="toggle-btn" data-scale="linear">Linear</button>
+    </div>
+  </div>
+  <div class="group">
+    <label>Export</label>
+    <button id="download-csv" class="btn">Download CSV</button>
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <div class="chart-canvas-box"><canvas id="history-chart"></canvas></div>
+  <div class="chart-note">Each point is a launch-day or refresh observation. "Price leader" view shows the cheapest model of the selected tier available at each date. "All providers" overlays one line per provider's best-of-tier model over time.</div>
+</div>
+
+<h2>The four regime shifts</h2>
+<p style="color: var(--muted); max-width: 800px;">The floor doesn't slide smoothly. It crashes through plateaus when something specific happens. The four below are the inflection points — each one ended a pricing era.</p>
+
+<div class="callout">
+  <div class="when">May 2024 · The OpenAI capitulation</div>
+  <div class="what">GPT-4o launches at $2.50 / $10 — a 4× cut from GPT-4 Turbo and 12× from the original GPT-4.</div>
+  <p class="why">OpenAI conceded that frontier-tier wasn't a price-inelastic luxury anymore. The Pro plan stayed, but the API tier had to move to compete with Anthropic Opus and the first usable Gemini Pro. This set the baseline everyone else underbid against for the next year.</p>
+</div>
+
+<div class="callout">
+  <div class="when">January 2025 · The DeepSeek R1 watershed</div>
+  <div class="what">An open-weight reasoning model from a Chinese hedge-fund spin-out lands within reach of o1's benchmarks at <strong>$0.55 / $2.19</strong> — 25× cheaper.</div>
+  <p class="why">R1 made it impossible for closed-source frontier reasoning to defend a 25× premium with quality alone. The hyperscalers responded by accelerating their own reasoning model price cuts. This is also the moment the "subsidy" narrative became unavoidable — somebody was eating a loss.</p>
+</div>
+
+<div class="callout">
+  <div class="when">November 2025 · The Opus 4.5 cut</div>
+  <div class="what">Anthropic drops Opus from $15/$75 to $5/$25 — a 67% cut at the highest-margin tier.</div>
+  <p class="why">Anthropic had held the premium line longest. The November cut was the official acknowledgment that frontier-tier sticker pricing wasn't a moat anymore. From here forward, providers competed on tokenizer efficiency, context window, and integration — not headline rate.</p>
+</div>
+
+<div class="callout">
+  <div class="when">March–April 2026 · The xAI undercut + DeepSeek V4 promo</div>
+  <div class="what">Grok 4.20 launches at <strong>$1.25 / $2.50</strong>; DeepSeek V4 Pro launches with a 75% promotional discount taking it to <strong>$0.435 / $0.87</strong>.</div>
+  <p class="why">Two new entrants raced the bottom simultaneously. The current frontier floor sits ~55% below SemiAnalysis's mid cost-to-serve estimate. This is the regime the Subsidy Index was built to instrument — somebody is wrong (either the cost-to-serve estimate or the assumption this is sustainable), and the next twelve months should reveal who.</p>
+</div>
+
+<h2>The data</h2>
+<p>Every observation in the chart is sourced from a provider pricing page or the OpenRouter API. Hover any point for source attribution. Download the full CSV via the button above, or grab <a href="../data/prices.json"><code>data/prices.json</code></a> directly.</p>
+
+<footer>
+  <strong>Cost of Intelligence</strong> · <a href="index.html">back to landing</a> · <a href="https://github.com/dlerhetal/cost-of-intelligence">source on GitHub</a>
+</footer>
+
+</div>
+
+<script>
+(async function () {
+  async function loadJSON(path) {
+    const r = await fetch(path + "?ts=" + Date.now());
+    if (!r.ok) throw new Error("Failed to load " + path);
+    return r.json();
+  }
+
+  const [prices, providers] = await Promise.all([
+    loadJSON("../data/prices.json"),
+    loadJSON("../data/providers.json"),
+  ]);
+
+  const PROVIDER_COLORS = {
+    anthropic: "#c14e2c",
+    openai:    "#10a37f",
+    google:    "#4285f4",
+    deepseek:  "#1f72f2",
+    mistral:   "#fa520f",
+    xai:       "#000000",
+  };
+
+  // Effective $/task at 2000-in/600-out reference mix
+  function effectiveTask(obs) {
+    if (obs.input_per_mtok_usd == null || obs.output_per_mtok_usd == null) return null;
+    const f = obs.tokenizer_factor ?? 1.0;
+    return (2000 * f / 1e6) * obs.input_per_mtok_usd + (600 * f / 1e6) * obs.output_per_mtok_usd;
+  }
+
+  const tierMembers = { frontier: new Set(), mid: new Set(), budget: new Set() };
+  for (const p of providers.providers) {
+    for (const m of p.models) {
+      const t = m.tier === "frontier-reasoning" ? "frontier" : m.tier;
+      if (tierMembers[t]) tierMembers[t].add(p.id + ":" + m.id);
+    }
+  }
+
+  let state = { tier: "frontier", unit: "task", view: "floor", scale: "log" };
+
+  function getValue(obs) {
+    if (state.unit === "task") return effectiveTask(obs);
+    if (state.unit === "output_mtok") return obs.output_per_mtok_usd;
+    if (state.unit === "input_mtok") return obs.input_per_mtok_usd;
+    return null;
+  }
+
+  function filteredObs() {
+    const members = tierMembers[state.tier];
+    return prices.observations
+      .filter(o => members.has(o.provider + ":" + o.model))
+      .filter(o => o.verified !== false)
+      .filter(o => getValue(o) != null);
+  }
+
+  // x axis is days since EPOCH (2023-01-01). Keeps Chart.js linear-scale happy.
+  const EPOCH = new Date("2023-01-01").getTime();
+  const DAY_MS = 86400000;
+  function toDays(dateStr) { return Math.round((new Date(dateStr).getTime() - EPOCH) / DAY_MS); }
+  function fromDays(d) { return new Date(EPOCH + d * DAY_MS); }
+  function fmtDate(d) {
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return months[d.getMonth()] + " " + d.getFullYear();
+  }
+
+  // Build floor-walk: at each date, what was the cheapest then-available model?
+  function buildFloorWalk(obs) {
+    const sorted = [...obs].sort((a, b) => a.observed_on.localeCompare(b.observed_on));
+    const latestPM = new Map();
+    const series = [];
+    for (const o of sorted) {
+      const key = o.provider + ":" + o.model;
+      latestPM.set(key, o);
+      let bestVal = Infinity, bestObs = null;
+      for (const cand of latestPM.values()) {
+        const v = getValue(cand);
+        if (v != null && v < bestVal) { bestVal = v; bestObs = cand; }
+      }
+      if (bestObs == null) continue;
+      series.push({
+        x: toDays(o.observed_on),
+        y: bestVal,
+        date: o.observed_on,
+        leader: bestObs.provider + " " + bestObs.model,
+      });
+    }
+    return series.filter((p, i, a) => i === 0 || p.y !== a[i - 1].y || p.leader !== a[i - 1].leader);
+  }
+
+  // Per-provider best-of-tier over time (running min)
+  function buildProviderSeries(obs) {
+    const byProvider = {};
+    for (const o of obs) {
+      const v = getValue(o);
+      if (v == null) continue;
+      if (!byProvider[o.provider]) byProvider[o.provider] = [];
+      byProvider[o.provider].push({ x: toDays(o.observed_on), y: v, date: o.observed_on, model: o.model });
+    }
+    const out = {};
+    for (const [prov, points] of Object.entries(byProvider)) {
+      points.sort((a, b) => a.x - b.x);
+      let runningMin = Infinity, runningModel = "";
+      const walk = [];
+      for (const p of points) {
+        if (p.y < runningMin) { runningMin = p.y; runningModel = p.model; }
+        walk.push({ x: p.x, y: runningMin, date: p.date, model: runningModel });
+      }
+      out[prov] = walk;
+    }
+    return out;
+  }
+
+  let chart = null;
+
+  function render() {
+    const obs = filteredObs();
+    const datasets = [];
+    if (state.view === "floor") {
+      const walk = buildFloorWalk(obs);
+      datasets.push({
+        label: state.tier.charAt(0).toUpperCase() + state.tier.slice(1) + " floor",
+        data: walk,
+        borderColor: "#b8550a",
+        backgroundColor: "rgba(184, 85, 10, 0.08)",
+        borderWidth: 2.5,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        stepped: "before",
+        fill: false,
+        tension: 0,
+      });
+    } else {
+      const perProv = buildProviderSeries(obs);
+      for (const [prov, points] of Object.entries(perProv)) {
+        datasets.push({
+          label: prov,
+          data: points,
+          borderColor: PROVIDER_COLORS[prov] || "#666",
+          backgroundColor: "transparent",
+          borderWidth: 2,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          stepped: "before",
+          fill: false,
+          tension: 0,
+        });
+      }
+    }
+
+    if (chart) chart.destroy();
+    const ctx = document.getElementById("history-chart").getContext("2d");
+    chart = new Chart(ctx, {
+      type: "line",
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: "nearest", axis: "x" },
+        scales: {
+          x: {
+            type: "linear",
+            ticks: {
+              color: "#6b6864",
+              maxTicksLimit: 10,
+              callback: v => fmtDate(fromDays(v)),
+            },
+            grid: { color: "#e3dfd6" },
+          },
+          y: {
+            type: state.scale,
+            ticks: {
+              color: "#6b6864",
+              callback: v => {
+                if (state.unit === "task") return "$" + (v < 0.01 ? v.toFixed(4) : v.toFixed(3));
+                return "$" + v.toFixed(2);
+              }
+            },
+            grid: { color: "#e3dfd6" },
+            title: {
+              display: true,
+              text: state.unit === "task" ? "$ per task (2000 in / 600 out)" :
+                    state.unit === "output_mtok" ? "$ per million output tokens" :
+                    "$ per million input tokens",
+              color: "#6b6864",
+            }
+          }
+        },
+        plugins: {
+          legend: { position: "bottom", labels: { color: "#1E1D1C", boxWidth: 14, padding: 12 } },
+          tooltip: {
+            callbacks: {
+              title: items => items.length ? items[0].raw.date : "",
+              label: ctx => {
+                const v = ctx.raw.y;
+                const formatted = state.unit === "task"
+                  ? "$" + v.toFixed(5)
+                  : "$" + v.toFixed(2) + " / MTok";
+                const tag = ctx.raw.leader || ctx.raw.model || ctx.dataset.label;
+                return `${tag}: ${formatted}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function wireToggle(rowId, key) {
+    document.getElementById(rowId).addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      document.querySelectorAll(`#${rowId} .toggle-btn`).forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      state[key] = b.dataset[key];
+      render();
+    });
+  }
+  wireToggle("tier-row", "tier");
+  wireToggle("unit-row", "unit");
+  wireToggle("view-row", "view");
+  wireToggle("scale-row", "scale");
+
+  document.getElementById("download-csv").addEventListener("click", () => {
+    const headers = ["observed_on", "provider", "model", "tier", "input_per_mtok_usd", "output_per_mtok_usd", "tokenizer_factor", "effective_per_task_usd", "source"];
+    const lines = [headers.join(",")];
+    for (const o of prices.observations) {
+      const eff = effectiveTask(o);
+      const row = [
+        o.observed_on,
+        o.provider,
+        o.model,
+        o.tier,
+        o.input_per_mtok_usd ?? "",
+        o.output_per_mtok_usd ?? "",
+        o.tokenizer_factor ?? 1,
+        eff == null ? "" : eff.toFixed(6),
+        JSON.stringify(o.source || ""),
+      ];
+      lines.push(row.join(","));
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "cost-of-intelligence-prices.csv";
+    a.click();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

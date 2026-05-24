@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cost of Intelligence — what does intelligence cost?</title>
+<meta name="description" content="A public open dataset and forecast model tracking the per-task price of AI inference across every major provider. Headline metric: the Subsidy Index.">
+<meta property="og:title" content="Cost of Intelligence">
+<meta property="og:description" content="What does intelligence cost — and when does the floor crack?">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="coi">
+  <h1>Cost of Intelligence</h1>
+  <p class="tagline">What does intelligence cost — and when does the floor crack?</p>
+  <nav class="nav">
+    <a class="here">Now</a>
+    <a href="history.html">History</a>
+    <a href="forecast.html">Forecast</a>
+    <a href="https://github.com/dlerhetal/cost-of-intelligence">GitHub</a>
+  </nav>
+</header>
+
+<section>
+  <div id="verdict-card" class="verdict-card">
+    <div>
+      <div class="label">Subsidy Verdict</div>
+      <div id="verdict" class="big-num">loading…</div>
+      <div id="updated" class="updated"></div>
+    </div>
+    <div>
+      <div class="label">What this means</div>
+      <p id="verdict-explainer" style="margin: 0.4rem 0;">Loading current snapshot…</p>
+      <div class="label" style="margin-top: 0.8rem;">Three signals (all must flip for subsidy_ending)</div>
+      <ul class="signals" id="signals"></ul>
+    </div>
+  </div>
+
+  <div class="grid-4">
+    <div class="card">
+      <span class="label">Frontier Floor</span>
+      <div class="big-num" id="frontier-floor">—</div>
+      <div class="submeta" id="frontier-meta"></div>
+    </div>
+    <div class="card">
+      <span class="label">Budget Floor</span>
+      <div class="big-num" id="budget-floor">—</div>
+      <div class="submeta" id="budget-meta"></div>
+    </div>
+    <div class="card">
+      <span class="label">Implied Margin</span>
+      <div class="big-num" id="implied-margin">—</div>
+      <div class="submeta">vs SemiAnalysis cost-to-serve mid</div>
+    </div>
+    <div class="card">
+      <span class="label">Capacity Overhang</span>
+      <div class="big-num" id="capacity-overhang">—</div>
+      <div class="submeta" id="capacity-meta"></div>
+    </div>
+  </div>
+</section>
+
+<h2>Go deeper</h2>
+<div class="grid-2">
+  <a href="history.html" class="link-tile">
+    <h3>Three years of price history →</h3>
+    <p>Walk every frontier-tier price leader from GPT-4 in March 2023 to today. Toggle providers, switch units, see the four regime shifts that broke the floor each time.</p>
+  </a>
+  <a href="forecast.html" class="link-tile">
+    <h3>Forecast the floor →</h3>
+    <p>Project current trajectory forward six months. Adjust the workload mix and cost-to-serve assumptions. See how the math changes when you change what you believe.</p>
+  </a>
+</div>
+
+<h2>Current frontier-tier pricing <span class="sub">all active frontier &amp; reasoning models, sorted by effective $/task</span></h2>
+<table id="frontier-table">
+  <thead><tr><th>Provider</th><th>Model</th><th class="num">In $/MTok</th><th class="num">Out $/MTok</th><th class="num">Tokenizer</th><th class="num">Effective $/task</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<h2>Current budget-tier pricing</h2>
+<table id="budget-table">
+  <thead><tr><th>Provider</th><th>Model</th><th class="num">In $/MTok</th><th class="num">Out $/MTok</th><th class="num">Effective $/task</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<h2>Methodology in three sentences</h2>
+<p>For every tracked model, COI computes an <strong>effective $/task</strong> by combining input/output token counts at a 2000-in/600-out reference mix with the provider's published rates, scaled by a tokenizer factor that captures changes in tokens consumed for identical text. The <strong>Frontier Floor</strong> is the cheapest frontier-tier model by that metric; the <strong>Implied Margin</strong> compares that price to SemiAnalysis cost-to-serve estimates; the <strong>Capacity Overhang</strong> is hyperscaler compute capex divided by reported token demand growth. Three signals must flip before the verdict reads <em>subsidy ending</em> — see <a href="forecast.html">the forecast page</a> for the rolling regression that drives the projection.</p>
+
+<details>
+  <summary>How fresh is this data?</summary>
+  <p><strong>Daily refresh:</strong> a GitHub Actions workflow hits <a href="https://openrouter.ai/api/v1/models">openrouter.ai/api/v1/models</a> at 05:17 UTC and writes any new observations to <code>data/prices.json</code>. The dashboard rebuilds from that file on every load.</p>
+  <p><strong>Verification cycle:</strong> Anthropic, Google, DeepSeek, xAI publish prices on public pages cited per-observation. OpenAI and Mistral pages block automated fetch; OpenRouter's pass-through rate is the primary source until a contributor adds a verified scraper for those two.</p>
+  <p><strong>Last computed:</strong> <span id="last-computed">—</span></p>
+</details>
+
+<h2 id="contribute">Contributing</h2>
+<p>The world is invited. No maintainer review queue — CI is the gate.</p>
+<ul>
+  <li><strong>Just report a price change:</strong> <a href="https://github.com/dlerhetal/cost-of-intelligence/issues/new?template=price-update.yml">open a GitHub Issue</a>.</li>
+  <li><strong>Add a provider, model, or benchmark:</strong> PR to the repo. See <code>CONTRIBUTING.md</code>.</li>
+  <li><strong>Improve the index math:</strong> PR to <code>scrapers/index_calc.py</code>. Better methodology wins.</li>
+</ul>
+<p>License: <strong>MIT</strong> on code, <strong>CC0</strong> on data. Use, fork, build on, sell consulting on top of. No permission needed.</p>
+
+<footer>
+  <strong>Cost of Intelligence</strong> · maintained by <a href="https://dlerhetal.tech">Dale Linn</a> · designed to outlive my attention.<br>
+  All numbers verifiable from sources in <a href="https://github.com/dlerhetal/cost-of-intelligence/blob/main/data/prices.json">data/prices.json</a>.
+</footer>
+
+</div>
+
+<script>
+(async function () {
+  const fmtUsd = n => (n === null || n === undefined) ? "—" : "$" + n.toFixed(4);
+  const fmtPct = n => (n === null || n === undefined) ? "—" : (n * 100).toFixed(1) + "%";
+  const fmtRatio = n => (n === null || n === undefined) ? "—" : n.toFixed(2);
+
+  const VERDICT_LABEL = {
+    active_subsidy: "Active subsidy",
+    transitioning: "Transitioning",
+    subsidy_ending: "Subsidy ending",
+  };
+  const VERDICT_BLURB = {
+    active_subsidy: "At least one major frontier model is priced below the SemiAnalysis cost-to-serve estimate. Buyers benefit; somebody upstream is eating the loss. This is the regime today.",
+    transitioning: "Mixed signals. Some indicators have flipped, others haven't. Watch the next two months of frontier floor movement.",
+    subsidy_ending: "All three signals have flipped. Floor has flattened, margins are above cost, supply growth no longer outpacing demand. Plan for upward pressure.",
+  };
+
+  async function load(path) {
+    const r = await fetch(path + "?ts=" + Date.now());
+    if (!r.ok) throw new Error("Failed to load " + path);
+    return r.json();
+  }
+
+  let snap, prices, providers;
+  try {
+    [snap, prices, providers] = await Promise.all([
+      load("index.json"),
+      load("../data/prices.json"),
+      load("../data/providers.json"),
+    ]);
+  } catch (e) {
+    document.getElementById("verdict").textContent = "—";
+    document.getElementById("verdict-explainer").textContent = "Dashboard data not yet available. Run scrapers/index_calc.py.";
+    console.error(e);
+    return;
+  }
+
+  const verdict = snap.verdict || "transitioning";
+  document.getElementById("verdict-card").classList.add(verdict);
+  document.getElementById("verdict").textContent = VERDICT_LABEL[verdict] || verdict;
+  document.getElementById("verdict-explainer").textContent = VERDICT_BLURB[verdict] || "";
+  const computedAt = new Date(snap.computed_at);
+  document.getElementById("updated").textContent = "Updated " + computedAt.toUTCString();
+  document.getElementById("last-computed").textContent = computedAt.toUTCString();
+
+  const sig = snap.signals || {};
+  const sigItems = [
+    ["frontier_floor_flat_2mo", "Frontier floor flat 2+ months"],
+    ["implied_margin_positive", "Implied margin above cost-to-serve"],
+    ["capacity_overhang_shrinking", "Capacity overhang shrinking"],
+  ];
+  document.getElementById("signals").innerHTML = sigItems.map(([k, label]) => {
+    const on = !!sig[k];
+    return `<li class="${on ? "on" : "off"}"><span class="marker">${on ? "✓" : "○"}</span> ${label}</li>`;
+  }).join("");
+
+  const ff = snap.frontier_floor;
+  if (ff) {
+    document.getElementById("frontier-floor").textContent = fmtUsd(ff.effective_per_task_usd) + " / task";
+    document.getElementById("frontier-meta").textContent = ff.provider + " · " + ff.model;
+  }
+  const bf = snap.budget_floor;
+  if (bf) {
+    document.getElementById("budget-floor").textContent = fmtUsd(bf.effective_per_task_usd) + " / task";
+    document.getElementById("budget-meta").textContent = bf.provider + " · " + bf.model;
+  }
+  document.getElementById("implied-margin").textContent = fmtPct(snap.implied_margin);
+  const co = snap.capacity_overhang;
+  if (co) {
+    document.getElementById("capacity-overhang").textContent = fmtRatio(co.overhang_ratio);
+    document.getElementById("capacity-meta").textContent = co.observed_on + " · " + (co.overhang_ratio < 1 ? "demand outpacing supply" : "supply outpacing demand");
+  }
+
+  function buildTable(elId, tierPred, includeTokenizer) {
+    const activeSet = new Set();
+    providers.providers.forEach(p => p.models.forEach(m => {
+      if (m.active && tierPred(m.tier)) activeSet.add(p.id + ":" + m.id);
+    }));
+    const latest = {};
+    for (const obs of prices.observations) {
+      const key = obs.provider + ":" + obs.model;
+      if (!activeSet.has(key)) continue;
+      if (!latest[key] || obs.observed_on > latest[key].observed_on) latest[key] = obs;
+    }
+    const rows = Object.values(latest).map(o => {
+      const factor = o.tokenizer_factor || 1.0;
+      const ept = (o.input_per_mtok_usd !== null && o.output_per_mtok_usd !== null)
+        ? ((2000 * factor / 1e6) * o.input_per_mtok_usd + (600 * factor / 1e6) * o.output_per_mtok_usd)
+        : null;
+      return { o, ept };
+    }).sort((a, b) => (a.ept ?? Infinity) - (b.ept ?? Infinity));
+
+    const tbody = document.querySelector(`#${elId} tbody`);
+    tbody.innerHTML = rows.map(({ o, ept }) => {
+      const cols = [
+        `<td>${o.provider}</td>`,
+        `<td>${o.model}</td>`,
+        `<td class="num">${o.input_per_mtok_usd === null ? '<span class="stub">—</span>' : "$" + o.input_per_mtok_usd.toFixed(2)}</td>`,
+        `<td class="num">${o.output_per_mtok_usd === null ? '<span class="stub">—</span>' : "$" + o.output_per_mtok_usd.toFixed(2)}</td>`,
+      ];
+      if (includeTokenizer) cols.push(`<td class="num">${(o.tokenizer_factor || 1.0).toFixed(2)}</td>`);
+      cols.push(`<td class="num">${ept === null ? '<span class="stub">—</span>' : fmtUsd(ept)}</td>`);
+      return `<tr>${cols.join("")}</tr>`;
+    }).join("");
+  }
+  const isFrontier = t => t === "frontier" || t === "frontier-reasoning";
+  const isBudget = t => t === "budget";
+  buildTable("frontier-table", isFrontier, true);
+  buildTable("budget-table", isBudget, false);
+})();
+</script>
+</body>
+</html>

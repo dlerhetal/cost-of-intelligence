@@ -1,0 +1,21 @@
+{
+  "$schema": "schema/capacity_overhang.schema.json",
+  "schema_version": "1.0.0",
+  "notes": "Hyperscaler announced capex (compute-relevant only) versus reported industry-wide token demand growth. Ratio > 1.0 means supply is outpacing demand (downward pressure on prices). Ratio < 1.0 means demand is outpacing supply (upward pressure).",
+  "observations": [
+    {
+      "observed_on": "2026-Q1",
+      "compute_capex_announced_usd_b": 320,
+      "token_demand_growth_pct_yoy": 380,
+      "overhang_ratio": 0.84,
+      "source": "Aggregated Q1 2026 earnings: MSFT, GOOG, META, AMZN + Goldman macro (placeholder; refresh from filings)"
+    },
+    {
+      "observed_on": "2026-Q2",
+      "compute_capex_announced_usd_b": null,
+      "token_demand_growth_pct_yoy": null,
+      "overhang_ratio": null,
+      "source": "Pending Q2 2026 earnings cycle"
+    }
+  ]
+}

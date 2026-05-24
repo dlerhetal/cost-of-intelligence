@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forecast — Cost of Intelligence</title>
+<meta name="description" content="Project the frontier floor forward six months. Adjust workload mix and cost-to-serve assumptions to see how subsidy runway shifts.">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="coi">
+  <h1>Cost of Intelligence</h1>
+  <p class="tagline">Project the floor forward. Stress-test your assumptions.</p>
+  <nav class="nav">
+    <a href="index.html">Now</a>
+    <a href="history.html">History</a>
+    <a class="here">Forecast</a>
+    <a href="https://github.com/dlerhetal/coast-of-intelligence">GitHub</a>
+  </nav>
+</header>
+
+<p style="font-size: 1.05rem; color: var(--muted); max-width: 800px;">
+The frontier floor has fallen roughly log-linear for three years, but two things will eventually stop that: <strong>cost-to-serve</strong> (you can't sell below GPU cost forever), and <strong>a capacity-vs-demand inflection</strong>. Slide the controls to test your view of either. The green dashed line is your assumed cost-to-serve floor; the dashed-orange forecast cone is the linear projection of the last twelve months.
+</p>
+
+<div class="controls" id="forecast-controls">
+  <div class="group">
+    <label>Workload: input tokens</label>
+    <div class="row">
+      <input type="range" id="input-tokens" min="100" max="20000" value="2000" step="100">
+      <span class="val" id="input-val">2,000</span>
+    </div>
+  </div>
+  <div class="group">
+    <label>Workload: output tokens</label>
+    <div class="row">
+      <input type="range" id="output-tokens" min="50" max="5000" value="600" step="50">
+      <span class="val" id="output-val">600</span>
+    </div>
+  </div>
+  <div class="group">
+    <label>Cost-to-serve assumption</label>
+    <div class="row">
+      <button class="toggle-btn" data-cts="low">SemiAnalysis low</button>
+      <button class="toggle-btn active" data-cts="mid">Mid</button>
+      <button class="toggle-btn" data-cts="high">High</button>
+    </div>
+  </div>
+  <div class="group">
+    <label>Scenario overlay</label>
+    <div class="row">
+      <button class="toggle-btn active" data-scenario="trajectory">Current trajectory</button>
+      <button class="toggle-btn" data-scenario="floor">Subsidy ends → floor hits cost</button>
+      <button class="toggle-btn" data-scenario="newgen">New-gen drop (next launch −40%)</button>
+    </div>
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <div class="chart-canvas-box"><canvas id="forecast-chart"></canvas></div>
+  <div class="chart-note">Solid orange: last 24 months of frontier floor (recomputed at your selected workload mix). Dashed orange: projection forward 6 months. Orange band: 1-σ confidence around the projection from the regression residuals. Green dashed: your cost-to-serve assumption.</div>
+</div>
+
+<div class="grid-4">
+  <div class="card">
+    <span class="label">Current floor (your mix)</span>
+    <div class="big-num" id="current-floor">—</div>
+    <div class="submeta" id="current-leader"></div>
+  </div>
+  <div class="card">
+    <span class="label">6-month projection</span>
+    <div class="big-num" id="proj-6mo">—</div>
+    <div class="submeta">central estimate</div>
+  </div>
+  <div class="card">
+    <span class="label">Cost-to-serve assumption</span>
+    <div class="big-num" id="cts-value">—</div>
+    <div class="submeta" id="cts-band">—</div>
+  </div>
+  <div class="card">
+    <span class="label">Subsidy runway</span>
+    <div class="big-num" id="runway">—</div>
+    <div class="submeta">months until floor meets cost</div>
+  </div>
+</div>
+
+<h2>How to read this</h2>
+<p>The orange line is empirical — it's the cheapest frontier-tier model available on each date, scored at the workload mix you picked. The orange dashed line is the regression's forward projection. The green dashed line is the assumption that matters most: <strong>at what per-token cost does serving inference actually break even?</strong></p>
+
+<div class="callout">
+  <div class="when">If your cost-to-serve line is ABOVE the orange line</div>
+  <div class="what">The market is in active subsidy.</div>
+  <p class="why">Providers are pricing below their fully-loaded cost. This is the regime today by SemiAnalysis's mid estimate. Either (a) the cost estimate is too high, (b) somebody upstream (hyperscaler, VC, government) is eating the loss, or (c) prices are about to move. Plan for (c) eventually.</p>
+</div>
+
+<div class="callout">
+  <div class="when">If your cost-to-serve line is BELOW the orange line</div>
+  <div class="what">The market is healthy at current prices.</div>
+  <p class="why">Margins are real, the floor reflects supply-demand equilibrium, and the multi-year decline was supply-side wins (better GPUs, better algorithms) rather than subsidy. In this world, further price drops are still possible but won't be subsidy-driven.</p>
+</div>
+
+<div class="callout">
+  <div class="when">If your forecast line crosses the cost-to-serve line during the horizon</div>
+  <div class="what">That's the moment the regime breaks.</div>
+  <p class="why">Either prices stop falling (subsidy gives way to cost-floor) or cost-to-serve falls to meet them (capacity catches up). The <strong>Subsidy Runway</strong> tile estimates this crossover date from the regression slope and your assumption.</p>
+</div>
+
+<h2>Methodology</h2>
+<p>The projection is a least-squares linear fit of <code>log($/task)</code> against time, computed on the last twelve months of observations. Linear-in-log gives multiplicative decay (which fits historical data better than linear). The 1-σ band is derived from the regression residuals. The scenario overlays are layered on top — they don't replace the central projection but show alternative paths.</p>
+<p>The forecast does <strong>not</strong> account for: known upcoming model launches, capacity announcements, regulatory shifts, or any qualitative factor a human would weigh. It's pattern continuation. Use it as one input, not the whole picture.</p>
+
+<footer>
+  <strong>Cost of Intelligence</strong> · <a href="index.html">back to landing</a> · <a href="https://github.com/dlerhetal/cost-of-intelligence">source on GitHub</a>
+</footer>
+
+</div>
+
+<script>
+(async function () {
+  async function loadJSON(path) {
+    const r = await fetch(path + "?ts=" + Date.now());
+    if (!r.ok) throw new Error("Failed to load " + path);
+    return r.json();
+  }
+
+  const [prices, providers, costs] = await Promise.all([
+    loadJSON("../data/prices.json"),
+    loadJSON("../data/providers.json"),
+    loadJSON("../data/cost_to_serve.json"),
+  ]);
+
+  const frontierMembers = new Set();
+  for (const p of providers.providers) {
+    for (const m of p.models) {
+      if (m.tier === "frontier" || m.tier === "frontier-reasoning") {
+        frontierMembers.add(p.id + ":" + m.id);
+      }
+    }
+  }
+
+  const fmtUsd = n => n == null ? "—" : "$" + (n < 0.01 ? n.toFixed(5) : n.toFixed(4));
+
+  const EPOCH = new Date("2023-01-01").getTime();
+  const DAY_MS = 86400000;
+  const toDays = ds => Math.round((new Date(ds).getTime() - EPOCH) / DAY_MS);
+  const fromDays = d => new Date(EPOCH + d * DAY_MS);
+  function fmtDate(dt) {
+    const m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return m[dt.getMonth()] + " " + dt.getFullYear();
+  }
+
+  const state = { inputTokens: 2000, outputTokens: 600, cts: "mid", scenario: "trajectory" };
+
+  function effectiveTask(obs, input, output) {
+    if (obs.input_per_mtok_usd == null || obs.output_per_mtok_usd == null) return null;
+    const f = obs.tokenizer_factor ?? 1.0;
+    return (input * f / 1e6) * obs.input_per_mtok_usd + (output * f / 1e6) * obs.output_per_mtok_usd;
+  }
+
+  function buildFloorWalk() {
+    const sorted = [...prices.observations]
+      .filter(o => frontierMembers.has(o.provider + ":" + o.model))
+      .filter(o => o.verified !== false)
+      .sort((a, b) => a.observed_on.localeCompare(b.observed_on));
+    const latestPM = new Map();
+    const series = [];
+    for (const o of sorted) {
+      latestPM.set(o.provider + ":" + o.model, o);
+      let bestVal = Infinity, bestObs = null;
+      for (const cand of latestPM.values()) {
+        const v = effectiveTask(cand, state.inputTokens, state.outputTokens);
+        if (v != null && v < bestVal) { bestVal = v; bestObs = cand; }
+      }
+      if (bestObs == null) continue;
+      series.push({ date: o.observed_on, value: bestVal, leader: bestObs.provider + " " + bestObs.model });
+    }
+    return series.filter((p, i, a) => i === 0 || p.value !== a[i - 1].value || p.leader !== a[i - 1].leader);
+  }
+
+  function linFit(xs, ys) {
+    const n = xs.length;
+    if (n < 2) return { slope: 0, intercept: ys[0] ?? 0, residStd: 0 };
+    const mx = xs.reduce((a, b) => a + b, 0) / n;
+    const my = ys.reduce((a, b) => a + b, 0) / n;
+    let num = 0, den = 0;
+    for (let i = 0; i < n; i++) { num += (xs[i] - mx) * (ys[i] - my); den += (xs[i] - mx) ** 2; }
+    const slope = den === 0 ? 0 : num / den;
+    const intercept = my - slope * mx;
+    let ss = 0;
+    for (let i = 0; i < n; i++) { const r = ys[i] - (slope * xs[i] + intercept); ss += r * r; }
+    const residStd = n > 2 ? Math.sqrt(ss / (n - 2)) : 0;
+    return { slope, intercept, residStd };
+  }
+
+  function buildForecast(walk) {
+    const lastDate = new Date(walk[walk.length - 1].date);
+    const cutoff = new Date(lastDate); cutoff.setMonth(cutoff.getMonth() - 12);
+    const recent = walk.filter(p => new Date(p.date) >= cutoff);
+    const pts = recent.length >= 4 ? recent : walk.slice(-12);
+    const xs = pts.map(p => new Date(p.date).getTime() / 86400000);
+    const ys = pts.map(p => Math.log(Math.max(p.value, 1e-9)));
+    const fit = linFit(xs, ys);
+    const last = pts[pts.length - 1];
+    const lastX = new Date(last.date).getTime() / 86400000;
+    const projection = [];
+    for (let d = 0; d <= 180; d += 15) {
+      const x = lastX + d;
+      const logPred = fit.slope * x + fit.intercept;
+      const pred = Math.exp(logPred);
+      projection.push({
+        date: new Date(x * 86400000).toISOString().slice(0, 10),
+        value: pred,
+        low: Math.exp(logPred - fit.residStd),
+        high: Math.exp(logPred + fit.residStd),
+      });
+    }
+    return { projection, fit };
+  }
+
+  function ctsValue() {
+    // SemiAnalysis frontier bands
+    const out = costs.bands.find(b => b.tier === "frontier" && b.tokens === "output");
+    const inp = costs.bands.find(b => b.tier === "frontier" && b.tokens === "input");
+    if (!out || !inp) return null;
+    const key = state.cts === "low" ? "low_per_mtok_usd" : state.cts === "high" ? "high_per_mtok_usd" : "mid_per_mtok_usd";
+    return (state.inputTokens / 1e6) * inp[key] + (state.outputTokens / 1e6) * out[key];
+  }
+
+  function scenarioOverlay(walk, projection) {
+    if (state.scenario === "trajectory") return null;
+    const last = walk[walk.length - 1];
+    const lastDays = toDays(last.date);
+    if (state.scenario === "floor") {
+      const target = ctsValue();
+      if (target == null) return null;
+      const start = last.value;
+      const pts = [];
+      for (let d = 0; d <= 180; d += 15) {
+        const t = Math.min(d / 180, 1);
+        const v = Math.exp(Math.log(start) + (Math.log(target) - Math.log(start)) * t);
+        pts.push({ x: lastDays + d, y: v });
+      }
+      return { label: "Scenario: subsidy ends → cost-to-serve floor", points: pts, color: "#a02020" };
+    }
+    if (state.scenario === "newgen") {
+      const pts = projection.map(p => ({ x: toDays(p.date), y: p.value }));
+      for (let i = 6; i < pts.length; i++) pts[i].y *= 0.6;
+      return { label: "Scenario: next-gen launch drops floor 40%", points: pts, color: "#2a7a2a" };
+    }
+    return null;
+  }
+
+  let chart = null;
+
+  function render() {
+    const walk = buildFloorWalk();
+    if (!walk.length) return;
+
+    const lastDate = new Date(walk[walk.length - 1].date);
+    const histStart = new Date(lastDate); histStart.setMonth(histStart.getMonth() - 24);
+    const recentWalk = walk.filter(p => new Date(p.date) >= histStart);
+
+    const { projection, fit } = buildForecast(walk);
+    const cts = ctsValue();
+    const overlay = scenarioOverlay(walk, projection);
+
+    // Tiles
+    document.getElementById("current-floor").textContent = fmtUsd(walk[walk.length - 1].value);
+    document.getElementById("current-leader").textContent = walk[walk.length - 1].leader;
+    const proj6 = projection[projection.length - 1];
+    document.getElementById("proj-6mo").textContent = fmtUsd(proj6.value);
+    document.getElementById("cts-value").textContent = fmtUsd(cts);
+    document.getElementById("cts-band").textContent = "SemiAnalysis " + state.cts;
+
+    let runwayText = "—";
+    if (cts != null && walk[walk.length - 1].value < cts) {
+      runwayText = "0 mo (already below)";
+    } else if (cts != null && fit.slope < 0) {
+      const lastX = new Date(walk[walk.length - 1].date).getTime() / 86400000;
+      const targetLog = Math.log(cts);
+      const xTarget = (targetLog - fit.intercept) / fit.slope;
+      const days = xTarget - lastX;
+      runwayText = days <= 0 ? "0 mo" : (days / 30).toFixed(1) + " mo";
+    } else if (cts != null && fit.slope >= 0) {
+      runwayText = "∞ (slope ≥ 0)";
+    }
+    document.getElementById("runway").textContent = runwayText;
+
+    // Build chart datasets — x is days-since-EPOCH (numeric)
+    const histPts = recentWalk.map(p => ({ x: toDays(p.date), y: p.value, date: p.date, leader: p.leader }));
+    const projPts = projection.map(p => ({ x: toDays(p.date), y: p.value, date: p.date }));
+    const lowPts = projection.map(p => ({ x: toDays(p.date), y: p.low, date: p.date }));
+    const highPts = projection.map(p => ({ x: toDays(p.date), y: p.high, date: p.date }));
+    if (histPts.length) {
+      const last = histPts[histPts.length - 1];
+      projPts.unshift({ x: last.x, y: last.y, date: last.date });
+      lowPts.unshift({ x: last.x, y: last.y, date: last.date });
+      highPts.unshift({ x: last.x, y: last.y, date: last.date });
+    }
+    const ctsLine = [];
+    if (cts != null && histPts.length) {
+      ctsLine.push({ x: histPts[0].x, y: cts });
+      ctsLine.push({ x: projPts[projPts.length - 1].x, y: cts });
+    }
+
+    const datasets = [
+      {
+        label: "Historical floor (last 24 mo)",
+        data: histPts,
+        borderColor: "#b8550a",
+        backgroundColor: "transparent",
+        borderWidth: 2.5,
+        pointRadius: 3,
+        stepped: "before",
+      },
+      {
+        label: "Forecast projection",
+        data: projPts,
+        borderColor: "#b8550a",
+        borderDash: [6, 5],
+        backgroundColor: "transparent",
+        borderWidth: 2,
+        pointRadius: 0,
+      },
+      {
+        label: "High confidence band",
+        data: highPts,
+        borderColor: "rgba(184, 85, 10, 0.3)",
+        backgroundColor: "rgba(184, 85, 10, 0.10)",
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: "+1",
+      },
+      {
+        label: "Low confidence band",
+        data: lowPts,
+        borderColor: "rgba(184, 85, 10, 0.3)",
+        backgroundColor: "transparent",
+        borderWidth: 1,
+        pointRadius: 0,
+      },
+      {
+        label: "Cost-to-serve (your assumption)",
+        data: ctsLine,
+        borderColor: "#2a7a2a",
+        backgroundColor: "transparent",
+        borderWidth: 1.5,
+        borderDash: [3, 4],
+        pointRadius: 0,
+      },
+    ];
+
+    if (overlay) {
+      datasets.push({
+        label: overlay.label,
+        data: overlay.points,
+        borderColor: overlay.color,
+        backgroundColor: "transparent",
+        borderWidth: 2,
+        borderDash: [2, 3],
+        pointRadius: 0,
+      });
+    }
+
+    if (chart) chart.destroy();
+    chart = new Chart(document.getElementById("forecast-chart").getContext("2d"), {
+      type: "line",
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: "nearest", axis: "x" },
+        scales: {
+          x: {
+            type: "linear",
+            ticks: { color: "#6b6864", maxTicksLimit: 10, callback: v => fmtDate(fromDays(v)) },
+            grid: { color: "#e3dfd6" },
+          },
+          y: { type: "logarithmic", ticks: { color: "#6b6864", callback: v => "$" + (v < 0.01 ? v.toFixed(4) : v.toFixed(3)) }, grid: { color: "#e3dfd6" }, title: { display: true, text: "$ per task (log)", color: "#6b6864" } }
+        },
+        plugins: {
+          legend: { position: "bottom", labels: { color: "#1E1D1C", boxWidth: 14, padding: 10, filter: it => !it.text.includes("confidence band") } },
+          tooltip: {
+            callbacks: {
+              title: items => items.length ? (items[0].raw.date || fmtDate(fromDays(items[0].raw.x))) : "",
+              label: ctx => {
+                const v = ctx.raw.y;
+                const tag = ctx.raw.leader ? ` (${ctx.raw.leader})` : "";
+                return `${ctx.dataset.label}: $${v.toFixed(5)}${tag}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Wiring
+  const inputT = document.getElementById("input-tokens");
+  const outputT = document.getElementById("output-tokens");
+  inputT.addEventListener("input", () => {
+    state.inputTokens = parseInt(inputT.value);
+    document.getElementById("input-val").textContent = state.inputTokens.toLocaleString();
+    render();
+  });
+  outputT.addEventListener("input", () => {
+    state.outputTokens = parseInt(outputT.value);
+    document.getElementById("output-val").textContent = state.outputTokens.toLocaleString();
+    render();
+  });
+
+  function wireToggle(rowSelector, key, stateKey) {
+    document.querySelectorAll(rowSelector).forEach(b => {
+      b.addEventListener("click", () => {
+        document.querySelectorAll(rowSelector).forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        state[stateKey] = b.dataset[key];
+        render();
+      });
+    });
+  }
+  wireToggle('[data-cts]', "cts", "cts");
+  wireToggle('[data-scenario]', "scenario", "scenario");
+
+  render();
+})();
+</script>
+</body>
+</html>

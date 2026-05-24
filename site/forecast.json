@@ -1,0 +1,42 @@
+{
+  "horizon_days": 180,
+  "asymptote_per_task_usd": 0.0208,
+  "frontier_projection": [
+    {
+      "date": "2026-06-21",
+      "projected_per_task_usd": 0.0012,
+      "band_low_per_task_usd": 0.0012,
+      "band_high_per_task_usd": 0.0012
+    },
+    {
+      "date": "2026-07-21",
+      "projected_per_task_usd": 0.0012,
+      "band_low_per_task_usd": 0.0012,
+      "band_high_per_task_usd": 0.0012
+    },
+    {
+      "date": "2026-08-20",
+      "projected_per_task_usd": 0.0012,
+      "band_low_per_task_usd": 0.0012,
+      "band_high_per_task_usd": 0.0012
+    },
+    {
+      "date": "2026-09-19",
+      "projected_per_task_usd": 0.0012,
+      "band_low_per_task_usd": 0.0012,
+      "band_high_per_task_usd": 0.0012
+    },
+    {
+      "date": "2026-10-19",
+      "projected_per_task_usd": 0.0012,
+      "band_low_per_task_usd": 0.0012,
+      "band_high_per_task_usd": 0.0012
+    },
+    {
+      "date": "2026-11-18",
+      "projected_per_task_usd": 0.0012,
+      "band_low_per_task_usd": 0.0012,
+      "band_high_per_task_usd": 0.0012
+    }
+  ]
+}

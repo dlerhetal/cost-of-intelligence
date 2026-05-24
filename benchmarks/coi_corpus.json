@@ -1,0 +1,59 @@
+{
+  "$schema": "../data/schema/benchmark.schema.json",
+  "name": "COI Custom Corpus",
+  "version": "1.0",
+  "description": "A small fixed set of prompts spanning the workload mix COI considers representative of agentic AI in 2026. Tokenizer-stable: each prompt is short enough that tokenizer drift between providers stays bounded. Run this corpus against every tracked model and record (input_tokens, output_tokens) per provider.",
+  "default_output_budget": 600,
+  "prompts": [
+    {
+      "id": "qa-short",
+      "category": "short-form QA",
+      "prompt": "In one paragraph, explain why a company would choose to fine-tune an open-weight model rather than prompt-engineer a frontier model."
+    },
+    {
+      "id": "summarize-medium",
+      "category": "summarization",
+      "prompt": "Summarize the following in 5 bullet points: The 2026 inference market is characterized by aggressive below-cost pricing from major providers, an emerging gap between sticker price and effective cost-per-task driven by tokenizer changes, and rapidly growing per-customer consumption that has outpaced enterprise budget assumptions. SemiAnalysis estimates frontier-tier output costs at $12–$28 per million tokens. Hyperscaler capex announcements for compute totaled $320B in Q1 2026 against industry token demand growth of approximately 380% year over year."
+    },
+    {
+      "id": "code-gen-easy",
+      "category": "code generation",
+      "prompt": "Write a Python function `effective_cost(input_tokens, output_tokens, input_rate_per_mtok, output_rate_per_mtok, tokenizer_factor=1.0)` that returns the cost in USD for a single inference call. Include a docstring and one example call in a comment."
+    },
+    {
+      "id": "code-debug",
+      "category": "debugging",
+      "prompt": "The following Python is meant to compute the median margin across a list of (price, cost) tuples but returns the mean. Identify the bug and produce a corrected version.\n\n```python\ndef median_margin(pairs):\n    margins = [(p - c) / c for p, c in pairs if c > 0]\n    return sum(margins) / len(margins)\n```"
+    },
+    {
+      "id": "tool-use",
+      "category": "structured tool call",
+      "prompt": "Given the function signature `get_price(provider: str, model: str, date: str) -> dict`, produce a JSON object representing a single tool call to retrieve Anthropic Opus 4.7 pricing for 2026-05-22. Output only the JSON."
+    },
+    {
+      "id": "extraction",
+      "category": "structured extraction",
+      "prompt": "Extract the following fields from this text into a JSON object: provider, model, input_price_per_mtok, output_price_per_mtok, effective_date. Text: 'Effective April 1, 2026, Anthropic launched Opus 4.7 at $5 per million input tokens and $25 per million output tokens.' Output only valid JSON."
+    },
+    {
+      "id": "reasoning-numeric",
+      "category": "numeric reasoning",
+      "prompt": "A frontier model charges $5/MTok input and $25/MTok output. A typical agentic workflow uses 2000 input tokens and 600 output tokens per call. If the tokenizer changes such that the same text now produces 35% more tokens, what is the new effective cost per call, in dollars to four decimal places?"
+    },
+    {
+      "id": "long-context-skim",
+      "category": "long-context recall",
+      "prompt": "The following list contains 12 items. Return only items 3, 7, and 11 as a numbered list:\n1. apple\n2. banana\n3. cherry\n4. date\n5. elderberry\n6. fig\n7. grape\n8. honeydew\n9. iceberg lettuce (not a fruit, included to test for filtering)\n10. jackfruit\n11. kiwi\n12. lemon"
+    },
+    {
+      "id": "rewrite-tone",
+      "category": "tone rewrite",
+      "prompt": "Rewrite the following in a neutral analytical voice, removing hype: 'AI is going to completely transform every industry by next year — companies that aren't aggressively adopting now will be left in the dust as the velocity of change accelerates exponentially.'"
+    },
+    {
+      "id": "classification",
+      "category": "classification",
+      "prompt": "Classify each of these as either subsidy-positive (favors below-cost pricing continuing) or subsidy-negative (puts upward pressure on prices). One word answer per item.\n- Hyperscaler announces $80B capex hike\n- IPO filing for major lab\n- Open-weight release matching frontier benchmarks\n- New GPU generation 2x energy efficient\n- Geopolitical chip export restrictions"
+    }
+  ]
+}

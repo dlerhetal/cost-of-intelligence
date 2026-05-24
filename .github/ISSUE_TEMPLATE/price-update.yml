@@ -1,0 +1,50 @@
+name: Price update
+description: Report a price change for a tracked model.
+title: "[price] <provider> <model>: <new input>/<new output> $/MTok"
+labels: ["price-update"]
+body:
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      options:
+        - anthropic
+        - openai
+        - google
+        - deepseek
+        - mistral
+        - xai
+        - other (specify in details)
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model ID
+      description: Use the same ID format as data/providers.json (e.g. opus-4-7).
+    validations:
+      required: true
+  - type: input
+    id: input_price
+    attributes:
+      label: Input price ($ per million tokens)
+    validations:
+      required: true
+  - type: input
+    id: output_price
+    attributes:
+      label: Output price ($ per million tokens)
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source URL
+      description: Link to the official pricing page or announcement.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Tokenizer changes, context-tier surcharges, anything weird.

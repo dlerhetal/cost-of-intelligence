@@ -1,0 +1,43 @@
+{
+  "$schema": "schema/cost_to_serve.schema.json",
+  "schema_version": "1.0.0",
+  "notes": "SemiAnalysis publishes inference cost-to-serve estimates as bands, not point values. Each entry is a low/mid/high estimate of fully-loaded cost per million tokens (GPU amortization + power + overhead). Bands widen further out and for less-public providers.",
+  "bands": [
+    {
+      "observed_on": "2026-05-22",
+      "tier": "frontier",
+      "tokens": "output",
+      "low_per_mtok_usd": 12.00,
+      "mid_per_mtok_usd": 18.00,
+      "high_per_mtok_usd": 28.00,
+      "source": "SemiAnalysis Q2 2026 inference economics estimate (placeholder; refresh from latest report)"
+    },
+    {
+      "observed_on": "2026-05-22",
+      "tier": "frontier",
+      "tokens": "input",
+      "low_per_mtok_usd": 3.00,
+      "mid_per_mtok_usd": 5.00,
+      "high_per_mtok_usd": 8.00,
+      "source": "SemiAnalysis Q2 2026 (placeholder)"
+    },
+    {
+      "observed_on": "2026-05-22",
+      "tier": "budget",
+      "tokens": "output",
+      "low_per_mtok_usd": 1.50,
+      "mid_per_mtok_usd": 3.00,
+      "high_per_mtok_usd": 5.00,
+      "source": "SemiAnalysis Q2 2026 (placeholder)"
+    },
+    {
+      "observed_on": "2026-05-22",
+      "tier": "budget",
+      "tokens": "input",
+      "low_per_mtok_usd": 0.30,
+      "mid_per_mtok_usd": 0.60,
+      "high_per_mtok_usd": 1.00,
+      "source": "SemiAnalysis Q2 2026 (placeholder)"
+    }
+  ]
+}
