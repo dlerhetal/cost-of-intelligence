@@ -272,7 +272,7 @@ The cheapest frontier-tier AI model has fallen <strong>~80×</strong> in three y
             grid: { color: "#e3dfd6" },
           },
           y: {
-            type: state.scale,
+            type: state.scale === "log" ? "logarithmic" : "linear",
             ticks: {
               color: "#6b6864",
               callback: v => {
