@@ -1849,6 +1849,43 @@
         "capacity_overhang_shrinking": false
       },
       "verdict": "active_subsidy"
+    },
+    {
+      "computed_at": "2026-07-11T07:19:47.438140+00:00",
+      "frontier_floor": {
+        "effective_per_task_usd": 0.001392,
+        "input_per_mtok_usd": 0.435,
+        "output_per_mtok_usd": 0.87,
+        "tokenizer_factor": 1.0,
+        "provider": "deepseek",
+        "model": "deepseek-v4-pro",
+        "observed_on": "2026-07-11"
+      },
+      "budget_floor": {
+        "effective_per_task_usd": 0.000246,
+        "input_per_mtok_usd": 0.077,
+        "output_per_mtok_usd": 0.154,
+        "tokenizer_factor": 1.0,
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "observed_on": "2026-07-11"
+      },
+      "implied_margin": -0.5481,
+      "capacity_overhang": {
+        "observed_on": "2026-Q1",
+        "compute_capex_announced_usd_b": 320,
+        "token_demand_growth_pct_yoy": 380,
+        "overhang_ratio": 0.84,
+        "source": "Aggregated Q1 2026 earnings: MSFT, GOOG, META, AMZN + Goldman macro (placeholder; refresh from filings)"
+      },
+      "subsidy_runway_months": 0,
+      "cost_to_serve_asymptote_per_task_usd": 0.0208,
+      "signals": {
+        "frontier_floor_flat_2mo": true,
+        "implied_margin_positive": false,
+        "capacity_overhang_shrinking": false
+      },
+      "verdict": "active_subsidy"
     }
   ]
 }
