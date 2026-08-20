@@ -1,13 +1,13 @@
 {
-  "computed_at": "2026-08-19T05:46:47.899745+00:00",
+  "computed_at": "2026-08-20T05:47:17.028582+00:00",
   "frontier_floor": {
-    "effective_per_task_usd": 0.002508,
-    "input_per_mtok_usd": 0.66,
-    "output_per_mtok_usd": 1.98,
+    "effective_per_task_usd": 0.004,
+    "input_per_mtok_usd": 1.25,
+    "output_per_mtok_usd": 2.5,
     "tokenizer_factor": 1.0,
-    "provider": "deepseek",
-    "model": "deepseek-v4-pro",
-    "observed_on": "2026-08-19"
+    "provider": "xai",
+    "model": "grok-4-20-non-reasoning",
+    "observed_on": "2026-08-20"
   },
   "budget_floor": {
     "effective_per_task_usd": 0.00026,
