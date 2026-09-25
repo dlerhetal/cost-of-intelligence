@@ -1,22 +1,22 @@
 {
-  "computed_at": "2026-09-24T10:03:23.254694+00:00",
+  "computed_at": "2026-09-25T10:12:55.271522+00:00",
   "frontier_floor": {
-    "effective_per_task_usd": 0.003007,
-    "input_per_mtok_usd": 0.9396,
-    "output_per_mtok_usd": 1.8792,
+    "effective_per_task_usd": 0.002506,
+    "input_per_mtok_usd": 0.783,
+    "output_per_mtok_usd": 1.566,
     "tokenizer_factor": 1.0,
     "provider": "deepseek",
     "model": "deepseek-v4-pro",
-    "observed_on": "2026-09-24"
+    "observed_on": "2026-09-25"
   },
   "budget_floor": {
-    "effective_per_task_usd": 0.000284,
-    "input_per_mtok_usd": 0.088606,
-    "output_per_mtok_usd": 0.177212,
+    "effective_per_task_usd": 0.000157,
+    "input_per_mtok_usd": 0.049,
+    "output_per_mtok_usd": 0.098,
     "tokenizer_factor": 1.0,
     "provider": "deepseek",
     "model": "deepseek-v4-flash",
-    "observed_on": "2026-09-24"
+    "observed_on": "2026-09-25"
   },
   "implied_margin": -0.5481,
   "capacity_overhang": {
