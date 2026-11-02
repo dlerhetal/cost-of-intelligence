@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-11-01T11:51:24.272115+00:00",
+  "computed_at": "2026-11-02T13:31:51.136561+00:00",
   "frontier_floor": {
     "effective_per_task_usd": 0.004,
     "input_per_mtok_usd": 1.25,
@@ -7,7 +7,7 @@
     "tokenizer_factor": 1.0,
     "provider": "xai",
     "model": "grok-4-20-non-reasoning",
-    "observed_on": "2026-11-01"
+    "observed_on": "2026-11-02"
   },
   "budget_floor": {
     "effective_per_task_usd": 0.000286,
