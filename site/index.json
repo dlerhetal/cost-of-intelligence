@@ -1,13 +1,13 @@
 {
-  "computed_at": "2026-11-12T13:47:13.681653+00:00",
+  "computed_at": "2026-11-13T13:08:22.345079+00:00",
   "frontier_floor": {
-    "effective_per_task_usd": 0.002855,
-    "input_per_mtok_usd": 0.892272,
-    "output_per_mtok_usd": 1.784544,
+    "effective_per_task_usd": 0.0027,
+    "input_per_mtok_usd": 0.9,
+    "output_per_mtok_usd": 1.5,
     "tokenizer_factor": 1.0,
     "provider": "deepseek",
     "model": "deepseek-v4-pro",
-    "observed_on": "2026-11-12"
+    "observed_on": "2026-11-13"
   },
   "budget_floor": {
     "effective_per_task_usd": 0.000286,
